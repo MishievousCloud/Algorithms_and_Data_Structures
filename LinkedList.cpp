@@ -1,9 +1,9 @@
 //============================================================================
 // Name        : LinkedList.cpp
-// Author      : Your Name
+// Author      : Justin Aebi
 // Version     : 1.0
 // Copyright   : Copyright © 2017 SNHU COCE
-// Description : Lab 3-3 Lists and Searching
+// Description : Lab 3-3 Lists and Searching SNHU CS-260
 //============================================================================
 
 #include <algorithm>
@@ -43,7 +43,26 @@ struct Bid {
 class LinkedList {
 
 private:
-    // FIXME (1): Internal structure for list entries, housekeeping variables
+    // Internal structure for list entries, housekeeping variables
+	struct Node {
+		Bid bid;
+		Node* next;
+
+		// Default constructor
+		Node() {
+			next = nullptr;
+		}
+
+		// Initializes a node with a bid
+		Node(Bid aBid) {
+			bid = aBid;
+			next = nullptr;
+		}
+	};
+
+	Node* head;
+	Node* tail;
+	int size = 0;
 
 public:
     LinkedList();
@@ -60,7 +79,8 @@ public:
  * Default constructor
  */
 LinkedList::LinkedList() {
-    // FIXME (2): Initialize housekeeping variables
+    // Initializes housekeeping variables
+	head = tail = nullptr;
 }
 
 /**
@@ -73,21 +93,52 @@ LinkedList::~LinkedList() {
  * Append a new bid to the end of the list
  */
 void LinkedList::Append(Bid bid) {
-    // FIXME (3): Implement append logic
+    // Implemented append logic
+	Node* node = new Node(bid);
+
+	if (head == nullptr) {
+		head = node;
+	} else {
+		if (tail != nullptr) {
+			tail->next = node;
+
+		}
+	}
+	// New node is always the tail
+	tail = node;
+
+	size++;
 }
 
 /**
  * Prepend a new bid to the start of the list
  */
 void LinkedList::Prepend(Bid bid) {
-    // FIXME (4): Implement prepend logic
+    // Implemented prepend logic
+	Node* node = new Node(bid);
+
+	if (head != nullptr) {
+			node->next = head;
+		}
+		// New node is always the tail
+		head = node;
+
+		size++;
 }
 
 /**
  * Simple output of all bids in the list
  */
 void LinkedList::PrintList() {
-    // FIXME (5): Implement print logic
+    // Implemented print logic
+	Node* current = head;
+
+	// Loop over each node looking for a match
+	while (current != nullptr) {
+		cout << current->bid.bidId << ": " << current->bid.title << " | "
+			 << current->bid.amount << " | " << current->bid.fund << endl;
+		current = current->next;
+	}
 }
 
 /**
@@ -96,7 +147,37 @@ void LinkedList::PrintList() {
  * @param bidId The bid id to remove from the list
  */
 void LinkedList::Remove(string bidId) {
-    // FIXME (6): Implement remove logic
+    // Implemented remove logic
+	if (head != nullptr) {
+		if (head->bid.bidId.compare(bidId) == 0) {
+			Node* tempNode = head->next;
+			delete head;
+			head = tempNode;
+
+		}
+	}
+
+	Node* current = head;
+
+	// Loop over each node looking for a match
+	while (current->next != nullptr) {
+		if (current->next->bid.bidId.compare(bidId) == 0) {
+			// Saves the next node
+			Node* tempNode = current->next;
+
+			// Make current node point beyond the next one
+			current->next = tempNode->next;
+
+			// Deletes temp node
+			delete tempNode;
+
+			// Decrements count
+			size--;
+
+			return;
+		}
+		current = current->next;
+	}
 }
 
 /**
@@ -105,7 +186,16 @@ void LinkedList::Remove(string bidId) {
  * @param bidId The bid id to search for
  */
 Bid LinkedList::Search(string bidId) {
-    // FIXME (7): Implement search logic
+    // Implemented search logic
+	Node* current = head;
+
+	// Loop over each node looking for a match
+	while (current != nullptr) {
+		if (current->bid.bidId.compare(bidId) == 0) {
+			return current->bid;
+		}
+		current = current->next;
+	}
 }
 
 /**

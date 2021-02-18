@@ -1,13 +1,16 @@
 //============================================================================
 // Name        : BinarySearchTree.cpp
-// Author      : JYour name
+// Author      : Justin Aebi
 // Version     : 1.0
 // Copyright   : Copyright © 2017 SNHU COCE
-// Description : Hello World in C++, Ansi-style
+// Description : Hello World in C++ 2-11-21 Lab 6-2
 //============================================================================
 
 #include <iostream>
 #include <time.h>
+#include <string>
+#include <algorithm>
+#include <stdlib.h>
 
 #include "CSVparser.hpp"
 
@@ -31,8 +34,23 @@ struct Bid {
     }
 };
 
-// FIXME (1): Internal structure for tree node
+// Internal structure for tree node
 struct Node {
+	Bid bid;
+	Node* left;
+	Node* right;
+
+	// Deafult constructor
+	Node() {
+		left = nullptr;
+		right = nullptr;
+	}
+
+	// Initialize with a given bid
+	Node(Bid aBid) : Node() {
+		this->bid = aBid;
+	}
+
 };
 
 //============================================================================
@@ -66,6 +84,7 @@ public:
  */
 BinarySearchTree::BinarySearchTree() {
     // initialize housekeeping variables
+	root = nullptr;
 }
 
 /**
@@ -84,22 +103,44 @@ void BinarySearchTree::InOrder() {
  * Insert a bid
  */
 void BinarySearchTree::Insert(Bid bid) {
-    // FIXME (2a) Implement inserting a bid into the tree
+    // Implement inserting a bid into the tree
+	if (root == nullptr) {
+		root = new Node(bid);
+	} else {
+		this->addNode(root, bid);
+	}
 }
 
 /**
  * Remove a bid
  */
 void BinarySearchTree::Remove(string bidId) {
-    // FIXME (4a) Implement removing a bid from the tree
+    // Implement removing a bid from the tree
+	this->removeNode(root, bidId);
 }
 
 /**
  * Search for a bid
  */
 Bid BinarySearchTree::Search(string bidId) {
-    // FIXME (3) Implement searching the tree for a bid
+    // Implement searching the tree for a bid
 
+	// Start searching from the root
+	Node* current = root;
+
+	// Keep looping downwards until bottom is reached or the bid is found
+	while (current != nullptr)	{
+		// If current node matches, return it
+		if (current->bid.bidId.compare(bidId) == 0) {
+			return current->bid;
+		}
+		// If bid is smaller than current, then traverse left
+		if (bidId.compare(current->bid.bidId) < 0) {
+			current = current->left;
+		} else {
+			current = current->right;
+		}
+	}
 	Bid bid;
     return bid;
 }
@@ -111,9 +152,74 @@ Bid BinarySearchTree::Search(string bidId) {
  * @param bid Bid to be added
  */
 void BinarySearchTree::addNode(Node* node, Bid bid) {
-    // FIXME (2b) Implement inserting a bid into the tree
+    // Implement inserting a bid into the tree
+
+	// if node id larger than the bid, add to left subtree
+	if (node->bid.bidId.compare(bid.bidId) > 0) {
+		if(node->left == nullptr) {
+			node->left = new Node(bid);
+		} else {
+			this->addNode(node->left, bid);
+		}
+	}
+	// add to right subtree
+	else {
+		if(node->right == nullptr) {
+		    node->right = new Node(bid);
+		} else {
+			this->addNode(node->right, bid);
+		}
+	}
 }
 void BinarySearchTree::inOrder(Node* node) {
+	if (node != nullptr) {
+		inOrder(node->left);
+	    cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | "
+	         << node->bid.fund << endl;
+		inOrder(node->right);
+	}
+}
+
+Node* BinarySearchTree::removeNode(Node* node, string bidId) {
+	// If this node is null then return
+	if(node == nullptr) {
+		return node;
+	}
+
+	// Recurse down left subtree
+	if (bidId.compare(node->bid.bidId) < 0) {
+		node->left = removeNode(node->left, bidId);
+	} else if (bidId.compare(node->bid.bidId) > 0) {
+		node->right = removeNode(node->right, bidId);
+	} else {
+		// No children thus a leaf node
+		if (node->left == nullptr && node->right == nullptr) {
+			delete node;
+			node = nullptr;
+		}
+		// One child to the left
+		else if (node->left != nullptr && node->right == nullptr) {
+			Node* temp = node;
+			node = node->left;
+			delete temp;
+		}
+		// One child to the right
+		else if (node->right != nullptr && node->left == nullptr) {
+			Node* temp = node;
+			node = node->right;
+			delete temp;
+		}
+		// Two children
+		else {
+			Node* temp = node->right;
+			while (temp->left != nullptr) {
+				temp = temp->left;
+			}
+			node->bid = temp->bid;
+			node->right = removeNode(node->right, temp->bid.bidId);
+		}
+	}
+	return node;
 }
 //============================================================================
 // Static methods used for testing
@@ -179,7 +285,7 @@ void loadBids(string csvPath, BinarySearchTree* bst) {
  * @param ch The character to strip out
  */
 double strToDouble(string str, char ch) {
-    str.erase(remove(str.begin(), str.end(), ch), str.end());
+    str.erase(remove(str.begin(), str.end(), ch), str.end()); // @suppress("Invalid arguments")
     return atof(str.c_str());
 }
 
